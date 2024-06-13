@@ -1,1 +1,4 @@
 // babel 配置
+{
+  "presets": ["@babel/preset-env", "@babel/preset-react"]
+}
