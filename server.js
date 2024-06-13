@@ -1,6 +1,9 @@
 // 服务端代码
-import express from "express";
+const express = require("express");
+// import express from "express";
 const app = express();
+
+app.use(express.static("dist"));
 
 const template = `
 <html lang="en">
@@ -11,6 +14,7 @@ const template = `
 </head>
 <body>
   <div id="root"></div>
+  <script src="bundle.js"></script>
 </body>
 </html>
 `;

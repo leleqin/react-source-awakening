@@ -1,0 +1,1 @@
+{"version":3,"file":"bundle.js","mappings":";;;;;AAAAA,OAAO,CAACC,GAAG,CAAC,cAAc,CAAC,C","sources":["webpack://react-source-awakening/./src/index.js"],"sourcesContent":["console.log(\"client start\");\r\n"],"names":["console","log"],"sourceRoot":""}

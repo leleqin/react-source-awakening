@@ -5,10 +5,11 @@ const webpackNodeExternals = require("webpack-node-externals");
 module.exports = {
   target: "node",
   mode: "development",
-  entry: "./server.mjs",
+  entry: "./server.js",
   output: {
     path: path.resolve(__dirname, "build"),
-    filename: "server.mjs",
+    filename: "server.js",
+    chunkFormat: "module",
   },
   // 指定 Babel
   module: {
