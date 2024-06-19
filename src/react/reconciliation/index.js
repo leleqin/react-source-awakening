@@ -77,7 +77,31 @@ const reconcileChildren = (fiber, children) => {
 };
 
 const executeTask = (fiber) => {
+  /**
+   * 构建子级 fiber 对象
+   */
   reconcileChildren(fiber, fiber.props.children);
+  /**
+   * 如果子级存在 返回子级
+   * 将这个子级当作父级 构建这个父级下的子级
+   * 一直递归下去，能得到所有左侧节点的 fiber 对象
+   */
+  if (fiber.child) {
+    return fiber.child;
+  }
+
+  /**
+   * 如果有同级 返回同级
+   * 如果有父级 退回到父级,再看父级有没有同级
+   * 保证每个节点都找到了
+   */
+  let currentExecuterFiber = fiber;
+  while (currentExecuterFiber.parent) {
+    if (currentExecuterFiber.sibling) {
+      return currentExecuterFiber.sibling;
+    }
+    currentExecuterFiber = currentExecuterFiber.parent;
+  }
   console.log(fiber);
 };
 
