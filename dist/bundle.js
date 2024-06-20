@@ -347,7 +347,7 @@ var getFirstTask = function getFirstTask() {
     props: task.props,
     stateNode: task.dom,
     tag: _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.ROOT,
-    effect: [],
+    effects: [],
     child: null
   };
 };
@@ -412,6 +412,10 @@ var executeTask = function executeTask(fiber) {
    */
   var currentExecuterFiber = fiber;
   while (currentExecuterFiber.parent) {
+    /**
+     * 使最外层的 effects 存储所有 fiber 对象
+     */
+    currentExecuterFiber.parent.effects = currentExecuterFiber.parent.effects.concat(currentExecuterFiber.effects.concat([currentExecuterFiber]));
     if (currentExecuterFiber.sibling) {
       return currentExecuterFiber.sibling;
     }

@@ -19,7 +19,12 @@ React 16 before 使用 `Stack` 存在的问题：
 比对 virtualDOM 使用循环和递归比对，一旦任务开始就无法中断，长期占用了主线程，JS 是单线程，会造成页面卡顿
 
 1. 使用 requestIdleCallback 在空闲实现
-2. 循环
+2. 循环 fiber 数组。统一获取 fiber 对象
+
+- 最外层 effects 数组中存放所有 fiber 对象
+- 构建真实 DOM 对象
+- 将 DOM 添加在页面中
+
 3. 拆任务
 
 - virtualDOM 比对 （可终止）
