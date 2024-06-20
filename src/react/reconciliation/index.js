@@ -18,6 +18,21 @@ const taskQueue = createTaskQueue();
 // 子任务
 let subTask = null;
 
+// 拿到最外层的 fiber。为后面拿到 effects 循环构建真实 DOM 做准备
+let pendingCommit = null;
+
+const commitAllWork = (fiber) => {
+  /**
+   * 遍历 fiber 对象，构建真实 DOM 对象
+   * 最外层的 fiber 对象包含所有元素的 fiber 对象
+   */
+  if (fiber.effectTag === EFFECT_TAG.PLACEMENT) {
+    fiber.effects.forEach((f) => {
+      f.parent.stateNode.append(f.stateNode);
+    });
+  }
+};
+
 const getFirstTask = () => {
   // 从任务队列中获取任务
   const task = taskQueue.pop();
@@ -110,7 +125,10 @@ const executeTask = (fiber) => {
     }
     currentExecuterFiber = currentExecuterFiber.parent;
   }
-  console.log(fiber);
+
+  // 最外层 fiber 对象
+  pendingCommit = currentExecuterFiber;
+  // console.log(currentExecuterFiber);
 };
 
 const workLoop = (deadline) => {
@@ -123,6 +141,13 @@ const workLoop = (deadline) => {
   while (subTask && deadline.timeRemaining() > 1) {
     // 执行任务 并返回一个新任务 while 执行
     subTask = executeTask(subTask);
+  }
+
+  /**
+   * 判断
+   */
+  if (pendingCommit) {
+    commitAllWork(pendingCommit);
   }
 };
 
