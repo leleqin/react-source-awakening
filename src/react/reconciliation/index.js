@@ -24,13 +24,27 @@ let pendingCommit = null;
 const commitAllWork = (fiber) => {
   /**
    * 遍历 fiber 对象，构建真实 DOM 对象
+   *
+   * 1. 普通节点
    * 最外层的 fiber 对象包含所有元素的 fiber 对象
+   *
+   * 2. 类组件节点
+   * 类组件本身无法追加真实 DOM。需要找到类组件的父级，
+   * 类组件的父级不是一个组件，而是一个普通的 DOM 元素，
+   * 往 DOM 元素中追加类组件返回的内容
    */
-  if (fiber.effectTag === EFFECT_TAG.PLACEMENT) {
-    fiber.effects.forEach((f) => {
-      f.parent.stateNode.append(f.stateNode);
-    });
-  }
+  fiber.effects.forEach((f) => {
+    if (f.effectTag === EFFECT_TAG.PLACEMENT) {
+      let tempFiber = f;
+      let parentFiber = f.parent;
+      while (parentFiber.tag === FIBER_TAG.CLASS_COMPONENT) {
+        parentFiber = parentFiber.parent;
+      }
+      if (tempFiber.tag === FIBER_TAG.COMPONENT) {
+        parentFiber.stateNode.append(tempFiber.stateNode);
+      }
+    }
+  });
 };
 
 const getFirstTask = () => {
@@ -74,6 +88,8 @@ const reconcileChildren = (fiber, children) => {
 
     /**
      * 为 fiber 对象添加 DOM 对象或组件实例对象
+     * 若是普通节点 stateNode 是 DOM 对象
+     * 若是类组件 stateNode 是组件实例对象
      */
     newFiber.stateNode = createStateNode(newFiber);
 
@@ -95,7 +111,12 @@ const executeTask = (fiber) => {
   /**
    * 构建子级 fiber 对象
    */
-  reconcileChildren(fiber, fiber.props.children);
+  if (fiber.tag === FIBER_TAG.CLASS_COMPONENT) {
+    // 类组件，children 是 render 返回的元素
+    reconcileChildren(fiber, fiber.stateNode.render());
+  } else {
+    reconcileChildren(fiber, fiber.props.children);
+  }
   /**
    * 如果子级存在 返回子级
    * 将这个子级当作父级 构建这个父级下的子级

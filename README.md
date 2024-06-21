@@ -40,7 +40,7 @@ Fiber --> 纤维
 {
   type           节点类型(元素，文本，组件)(具体的类型)
   props          节点属性
-  stateNode      节点 DOM 对象 | 组件实例对象
+  stateNode      普通组件 -> 节点 DOM 对象 |  类组件 -> 组件实例对象
   tag            节点标记（hostRoot || hostComponent || classComponent || functionComponent）
   effects        数组，存储需要更改的fiber 对象
   effectTag      当前 Fiber 要被执行的操作 （增删改）
