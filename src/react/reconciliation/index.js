@@ -29,17 +29,31 @@ const commitAllWork = (fiber) => {
    * 最外层的 fiber 对象包含所有元素的 fiber 对象
    *
    * 2. 类组件节点
-   * 类组件本身无法追加真实 DOM。需要找到类组件的父级，
-   * 类组件的父级不是一个组件，而是一个普通的 DOM 元素，
+   * 类组件本身无法追加真实 DOM。需要找到类组件的普通父级，
    * 往 DOM 元素中追加类组件返回的内容
+   *
+   * 3. 函数组件节点
+   * 同类组件，找到函数组件的普通父级
    */
   fiber.effects.forEach((f) => {
     if (f.effectTag === EFFECT_TAG.PLACEMENT) {
+      /**
+       * 当前要追加的子节点
+       */
       let tempFiber = f;
+      /**
+       * 当前要追加的子节点的父级
+       */
       let parentFiber = f.parent;
-      while (parentFiber.tag === FIBER_TAG.CLASS_COMPONENT) {
+      while (
+        parentFiber.tag === FIBER_TAG.CLASS_COMPONENT ||
+        parentFiber.tag === FIBER_TAG.FUNCTION_COMPONENT
+      ) {
         parentFiber = parentFiber.parent;
       }
+      /**
+       * 如果子节点是普通节点，找到父级，将子节点追加到父级中
+       */
       if (tempFiber.tag === FIBER_TAG.COMPONENT) {
         parentFiber.stateNode.append(tempFiber.stateNode);
       }
@@ -114,6 +128,9 @@ const executeTask = (fiber) => {
   if (fiber.tag === FIBER_TAG.CLASS_COMPONENT) {
     // 类组件，children 是 render 返回的元素
     reconcileChildren(fiber, fiber.stateNode.render());
+  } else if (fiber.tag === FIBER_TAG.FUNCTION_COMPONENT) {
+    // 函数组件，children 是 render 返回的元素
+    reconcileChildren(fiber, fiber.stateNode(fiber.props));
   } else {
     reconcileChildren(fiber, fiber.props.children);
   }

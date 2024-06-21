@@ -415,17 +415,28 @@ var commitAllWork = function commitAllWork(fiber) {
    * 最外层的 fiber 对象包含所有元素的 fiber 对象
    *
    * 2. 类组件节点
-   * 类组件本身无法追加真实 DOM。需要找到类组件的父级，
-   * 类组件的父级不是一个组件，而是一个普通的 DOM 元素，
+   * 类组件本身无法追加真实 DOM。需要找到类组件的普通父级，
    * 往 DOM 元素中追加类组件返回的内容
+   *
+   * 3. 函数组件节点
+   * 同类组件，找到函数组件的普通父级
    */
   fiber.effects.forEach(function (f) {
     if (f.effectTag === _constants__WEBPACK_IMPORTED_MODULE_0__.EFFECT_TAG.PLACEMENT) {
+      /**
+       * 当前要追加的子节点
+       */
       var tempFiber = f;
+      /**
+       * 当前要追加的子节点的父级
+       */
       var parentFiber = f.parent;
-      while (parentFiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT) {
+      while (parentFiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT || parentFiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.FUNCTION_COMPONENT) {
         parentFiber = parentFiber.parent;
       }
+      /**
+       * 如果子节点是普通节点，找到父级，将子节点追加到父级中
+       */
       if (tempFiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.COMPONENT) {
         parentFiber.stateNode.append(tempFiber.stateNode);
       }
@@ -494,6 +505,9 @@ var executeTask = function executeTask(fiber) {
   if (fiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT) {
     // 类组件，children 是 render 返回的元素
     reconcileChildren(fiber, fiber.stateNode.render());
+  } else if (fiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.FUNCTION_COMPONENT) {
+    // 函数组件，children 是 render 返回的元素
+    reconcileChildren(fiber, fiber.stateNode(fiber.props));
   } else {
     reconcileChildren(fiber, fiber.props.children);
   }
@@ -668,11 +682,19 @@ var Grating = /*#__PURE__*/function (_Component) {
   return _createClass(Grating, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "hahaha");
+      return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, this.props.title, "hahaha");
     }
   }]);
-}(_react__WEBPACK_IMPORTED_MODULE_0__.Component);
-(0,_react__WEBPACK_IMPORTED_MODULE_0__.render)( /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement(Grating, null), root);
+}(_react__WEBPACK_IMPORTED_MODULE_0__.Component); // render(<Grating title="hello" />, root);
+/**
+ * 渲染函数组件
+ */
+function FnComponent(props) {
+  return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, props.title, "\u51FD\u6570\u7EC4\u4EF6");
+}
+(0,_react__WEBPACK_IMPORTED_MODULE_0__.render)( /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement(FnComponent, {
+  title: "hello"
+}), root);
 /******/ })()
 ;
 //# sourceMappingURL=bundle.js.map

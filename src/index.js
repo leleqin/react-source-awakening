@@ -20,8 +20,18 @@ class Grating extends Component {
   }
 
   render() {
-    return <div>hahaha</div>;
+    return <div>{this.props.title}hahaha</div>;
   }
 }
 
-render(<Grating />, root);
+// render(<Grating title="hello" />, root);
+
+/**
+ * 渲染函数组件
+ */
+
+function FnComponent(props) {
+  return <div>{props.title}函数组件</div>;
+}
+
+render(<FnComponent title="hello" />, root);
