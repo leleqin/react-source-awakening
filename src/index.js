@@ -9,18 +9,18 @@ const jsx = (
   </div>
 );
 
-render(jsx, root);
+// render(jsx, root);
 
-// 模拟更新操作
-setTimeout(() => {
-  const jsxUpdate = (
-    <div>
-      {/* <div>更新</div> */}
-      <p>Hi fiber</p>
-    </div>
-  );
-  render(jsxUpdate, root);
-}, 2000);
+// // 模拟更新操作
+// setTimeout(() => {
+//   const jsxUpdate = (
+//     <div>
+//       {/* <div>更新</div> */}
+//       <p>Hi fiber</p>
+//     </div>
+//   );
+//   render(jsxUpdate, root);
+// }, 2000);
 
 /**
  * 渲染类组件
@@ -28,14 +28,22 @@ setTimeout(() => {
 class Grating extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      name: "张三",
+    };
   }
 
   render() {
-    return <div>{this.props.title}hahaha</div>;
+    return (
+      <div>
+        {this.props.title}hahaha{this.state.name}
+        <button onClick={() => this.setState({ name: "李四" })}>button</button>
+      </div>
+    );
   }
 }
 
-// render(<Grating title="hello" />, root);
+render(<Grating title="hello" />, root);
 
 /**
  * 渲染函数组件

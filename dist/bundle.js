@@ -41,16 +41,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Component: () => (/* binding */ Component)
 /* harmony export */ });
+/* harmony import */ var _reconciliation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../reconciliation */ "./src/react/reconciliation/index.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
 function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-var Component = /*#__PURE__*/_createClass(function Component(props) {
-  _classCallCheck(this, Component);
-  this.props = props;
-});
+
+var Component = /*#__PURE__*/function () {
+  function Component(props) {
+    _classCallCheck(this, Component);
+    this.props = props;
+  }
+  return _createClass(Component, [{
+    key: "setState",
+    value: function setState(partialState) {
+      (0,_reconciliation__WEBPACK_IMPORTED_MODULE_0__.scheduleUpdate)(this, partialState);
+    }
+  }]);
+}();
 
 /***/ }),
 
@@ -339,6 +349,28 @@ var createStateNode = function createStateNode(fiber) {
 
 /***/ }),
 
+/***/ "./src/react/Misc/getRoot/index.js":
+/*!*****************************************!*\
+  !*** ./src/react/Misc/getRoot/index.js ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+var getRoot = function getRoot(instance) {
+  var fiber = instance.__fiber;
+  // 获取根节点的 fiber 对象
+  while (fiber.parent) {
+    fiber = fiber.parent;
+  }
+  return fiber;
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getRoot);
+
+/***/ }),
+
 /***/ "./src/react/Misc/getTag/index.js":
 /*!****************************************!*\
   !*** ./src/react/Misc/getTag/index.js ***!
@@ -380,12 +412,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   arrified: () => (/* reexport safe */ _Arrified__WEBPACK_IMPORTED_MODULE_1__["default"]),
 /* harmony export */   createStateNode: () => (/* reexport safe */ _createStateNode__WEBPACK_IMPORTED_MODULE_2__["default"]),
 /* harmony export */   createTaskQueue: () => (/* reexport safe */ _CreateTaskQueue__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   getRoot: () => (/* reexport safe */ _getRoot__WEBPACK_IMPORTED_MODULE_4__["default"]),
 /* harmony export */   getTag: () => (/* reexport safe */ _getTag__WEBPACK_IMPORTED_MODULE_3__["default"])
 /* harmony export */ });
 /* harmony import */ var _CreateTaskQueue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CreateTaskQueue */ "./src/react/Misc/CreateTaskQueue/index.js");
 /* harmony import */ var _Arrified__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Arrified */ "./src/react/Misc/Arrified/index.js");
 /* harmony import */ var _createStateNode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./createStateNode */ "./src/react/Misc/createStateNode/index.js");
 /* harmony import */ var _getTag__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./getTag */ "./src/react/Misc/getTag/index.js");
+/* harmony import */ var _getRoot__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./getRoot */ "./src/react/Misc/getRoot/index.js");
+
 
 
 
@@ -425,11 +460,18 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* binding */ render)
+/* harmony export */   render: () => (/* binding */ render),
+/* harmony export */   scheduleUpdate: () => (/* binding */ scheduleUpdate)
 /* harmony export */ });
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../constants */ "./src/constants/index.js");
 /* harmony import */ var _DOM__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../DOM */ "./src/react/DOM/index.js");
 /* harmony import */ var _Misc__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../Misc */ "./src/react/Misc/index.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
  *
  * @param {*} element
@@ -472,6 +514,10 @@ var commitAllWork = function commitAllWork(fiber) {
    * 同类组件，找到函数组件的普通父级
    */
   fiber.effects.forEach(function (f) {
+    // 为更新组件状态；将组件的 fiber 对象备份到组件的实例对象上
+    if (f.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT) {
+      f.stateNode.__fiber = f;
+    }
     if (f.effectTag === _constants__WEBPACK_IMPORTED_MODULE_0__.EFFECT_TAG.DELETE) {
       f.parent.stateNode.removeChild(f.stateNode);
     } else if (f.effectTag === _constants__WEBPACK_IMPORTED_MODULE_0__.EFFECT_TAG.UPDATE) {
@@ -523,6 +569,28 @@ var commitAllWork = function commitAllWork(fiber) {
 var getFirstTask = function getFirstTask() {
   // 从任务队列中获取任务
   var task = taskQueue.pop();
+
+  /**
+   * 判断是否是组件更新任务
+   */
+  if (task.from === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT) {
+    /**
+     * 根据已经存在的最外层的 fiber 对象构建，构建更新的根节点 fiber 对象
+     */
+    // 获取组件 fiber 对象
+    var root = (0,_Misc__WEBPACK_IMPORTED_MODULE_2__.getRoot)(task.instance);
+    // 存储要更新的状态
+    task.instance.__fiber.partialState = task.partialState;
+    return {
+      props: root.props,
+      stateNode: root.stateNode,
+      tag: _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.ROOT,
+      effects: [],
+      child: null,
+      // 备份 fiber 对象
+      alternate: root
+    };
+  }
 
   // 获取根节点，返回根节点的 fiber 对象
   return {
@@ -631,6 +699,13 @@ var executeTask = function executeTask(fiber) {
    * 构建子级 fiber 对象
    */
   if (fiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT) {
+    /**
+     * 更新组件状态，以便后面的 render 返回更新状态的 jsx
+     */
+    // 实例对象获取组件的 fiber 对象
+    if (fiber.stateNode.__fiber && fiber.stateNode.__fiber.partialState) {
+      fiber.stateNode.state = _objectSpread(_objectSpread({}, fiber.stateNode.state), fiber.stateNode.__fiber.partialState);
+    }
     // 类组件，children 是 render 返回的元素
     reconcileChildren(fiber, fiber.stateNode.render());
   } else if (fiber.tag === _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.FUNCTION_COMPONENT) {
@@ -708,6 +783,27 @@ var render = function render(element, dom) {
     props: {
       children: element
     }
+  });
+
+  // 浏览器空闲时间执行任务
+  requestIdleCallback(performTask);
+};
+
+/**
+ * @name 更新状态
+ * @param {*} instance 组件实例对象
+ * @param {*} partialState 要更新的值
+ */
+var scheduleUpdate = function scheduleUpdate(instance, partialState) {
+  // 将 partialState 的值覆盖原本的值
+  /**
+   * 1. 将组件状态更新加入任务
+   * 2. 和其他任务做区分 from
+   */
+  taskQueue.push({
+    from: _constants__WEBPACK_IMPORTED_MODULE_0__.FIBER_TAG.CLASS_COMPONENT,
+    instance: instance,
+    partialState: partialState
   });
 
   // 浏览器空闲时间执行任务
@@ -794,33 +890,56 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
 
 var root = document.getElementById("root");
 var jsx = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hello React"), /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hi fiber"));
-(0,_react__WEBPACK_IMPORTED_MODULE_0__.render)(jsx, root);
 
-// 模拟更新操作
-setTimeout(function () {
-  var jsxUpdate = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hi fiber"));
-  (0,_react__WEBPACK_IMPORTED_MODULE_0__.render)(jsxUpdate, root);
-}, 2000);
+// render(jsx, root);
+
+// // 模拟更新操作
+// setTimeout(() => {
+//   const jsxUpdate = (
+//     <div>
+//       {/* <div>更新</div> */}
+//       <p>Hi fiber</p>
+//     </div>
+//   );
+//   render(jsxUpdate, root);
+// }, 2000);
 
 /**
  * 渲染类组件
  */
 var Grating = /*#__PURE__*/function (_Component) {
   function Grating(props) {
+    var _this;
     _classCallCheck(this, Grating);
-    return _callSuper(this, Grating, [props]);
+    _this = _callSuper(this, Grating, [props]);
+    _this.state = {
+      name: "张三"
+    };
+    return _this;
   }
   _inherits(Grating, _Component);
   return _createClass(Grating, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, this.props.title, "hahaha");
+      var _this2 = this;
+      return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, this.props.title, "hahaha", this.state.name, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("button", {
+        onClick: function onClick() {
+          return _this2.setState({
+            name: "李四"
+          });
+        }
+      }, "button"));
     }
   }]);
-}(_react__WEBPACK_IMPORTED_MODULE_0__.Component); // render(<Grating title="hello" />, root);
+}(_react__WEBPACK_IMPORTED_MODULE_0__.Component);
+(0,_react__WEBPACK_IMPORTED_MODULE_0__.render)( /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement(Grating, {
+  title: "hello"
+}), root);
+
 /**
  * 渲染函数组件
  */
+
 function FnComponent(props) {
   return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, props.title, "\u51FD\u6570\u7EC4\u4EF6");
 }

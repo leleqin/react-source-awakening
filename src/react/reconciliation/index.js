@@ -12,7 +12,13 @@
 
 import { EFFECT_TAG, FIBER_TAG } from "../../constants";
 import { updateNodeElement } from "../DOM";
-import { createTaskQueue, arrified, createStateNode, getTag } from "../Misc";
+import {
+  createTaskQueue,
+  arrified,
+  createStateNode,
+  getTag,
+  getRoot,
+} from "../Misc";
 
 const taskQueue = createTaskQueue();
 
@@ -41,6 +47,11 @@ const commitAllWork = (fiber) => {
    * 同类组件，找到函数组件的普通父级
    */
   fiber.effects.forEach((f) => {
+    // 为更新组件状态；将组件的 fiber 对象备份到组件的实例对象上
+    if (f.tag === FIBER_TAG.CLASS_COMPONENT) {
+      f.stateNode.__fiber = f;
+    }
+
     if (f.effectTag === EFFECT_TAG.DELETE) {
       f.parent.stateNode.removeChild(f.stateNode);
     } else if (f.effectTag === EFFECT_TAG.UPDATE) {
@@ -96,6 +107,28 @@ const commitAllWork = (fiber) => {
 const getFirstTask = () => {
   // 从任务队列中获取任务
   const task = taskQueue.pop();
+
+  /**
+   * 判断是否是组件更新任务
+   */
+  if (task.from === FIBER_TAG.CLASS_COMPONENT) {
+    /**
+     * 根据已经存在的最外层的 fiber 对象构建，构建更新的根节点 fiber 对象
+     */
+    // 获取组件 fiber 对象
+    const root = getRoot(task.instance);
+    // 存储要更新的状态
+    task.instance.__fiber.partialState = task.partialState;
+    return {
+      props: root.props,
+      stateNode: root.stateNode,
+      tag: FIBER_TAG.ROOT,
+      effects: [],
+      child: null,
+      // 备份 fiber 对象
+      alternate: root,
+    };
+  }
 
   // 获取根节点，返回根节点的 fiber 对象
   return {
@@ -210,6 +243,16 @@ const executeTask = (fiber) => {
    * 构建子级 fiber 对象
    */
   if (fiber.tag === FIBER_TAG.CLASS_COMPONENT) {
+    /**
+     * 更新组件状态，以便后面的 render 返回更新状态的 jsx
+     */
+    // 实例对象获取组件的 fiber 对象
+    if (fiber.stateNode.__fiber && fiber.stateNode.__fiber.partialState) {
+      fiber.stateNode.state = {
+        ...fiber.stateNode.state,
+        ...fiber.stateNode.__fiber.partialState,
+      };
+    }
     // 类组件，children 是 render 返回的元素
     reconcileChildren(fiber, fiber.stateNode.render());
   } else if (fiber.tag === FIBER_TAG.FUNCTION_COMPONENT) {
@@ -292,6 +335,27 @@ export const render = (element, dom) => {
   taskQueue.push({
     dom,
     props: { children: element },
+  });
+
+  // 浏览器空闲时间执行任务
+  requestIdleCallback(performTask);
+};
+
+/**
+ * @name 更新状态
+ * @param {*} instance 组件实例对象
+ * @param {*} partialState 要更新的值
+ */
+export const scheduleUpdate = (instance, partialState) => {
+  // 将 partialState 的值覆盖原本的值
+  /**
+   * 1. 将组件状态更新加入任务
+   * 2. 和其他任务做区分 from
+   */
+  taskQueue.push({
+    from: FIBER_TAG.CLASS_COMPONENT,
+    instance,
+    partialState,
   });
 
   // 浏览器空闲时间执行任务
