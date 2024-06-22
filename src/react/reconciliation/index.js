@@ -11,6 +11,7 @@
  */
 
 import { EFFECT_TAG, FIBER_TAG } from "../../constants";
+import { updateNodeElement } from "../DOM";
 import { createTaskQueue, arrified, createStateNode, getTag } from "../Misc";
 
 const taskQueue = createTaskQueue();
@@ -21,9 +22,13 @@ let subTask = null;
 // 拿到最外层的 fiber。为后面拿到 effects 循环构建真实 DOM 做准备
 let pendingCommit = null;
 
+/**
+ * @name 生成真实 DOM 对象
+ * @param {object} fiber **根节点** 的 fiber 对象
+ */
 const commitAllWork = (fiber) => {
   /**
-   * 遍历 fiber 对象，构建真实 DOM 对象
+   * 遍历所有 fiber 对象，即 effects 数组。构建真实 DOM 对象
    *
    * 1. 普通节点
    * 最外层的 fiber 对象包含所有元素的 fiber 对象
@@ -36,7 +41,27 @@ const commitAllWork = (fiber) => {
    * 同类组件，找到函数组件的普通父级
    */
   fiber.effects.forEach((f) => {
-    if (f.effectTag === EFFECT_TAG.PLACEMENT) {
+    if (f.effectTag === EFFECT_TAG.UPDATE) {
+      /**
+       * 判断是不是同一种类型节点
+       */
+      if (f.type === f.alternate.type) {
+        /**
+         * 节点类型相同，更新 DOM
+         * @param 要更新的 DOM 节点
+         * @param 新的 virtual DOM
+         * @param 旧的 virtual DOM
+         */
+        updateNodeElement(f.stateNode, f, f.alternate);
+      } else {
+        /**
+         * 节点类型不同，直接替换
+         * @param 新节点 stateNode
+         * @param 旧节点的 stateNode
+         */
+        f.parent.stateNode.replaceChild(f.stateNode, f.alternate.stateNode);
+      }
+    } else if (f.effectTag === EFFECT_TAG.PLACEMENT) {
       /**
        * 当前要追加的子节点
        */
@@ -59,6 +84,11 @@ const commitAllWork = (fiber) => {
       }
     }
   });
+
+  /**
+   * 备份旧的 fiber 对象，以便后面更新使用
+   */
+  fiber.stateNode.__rootFiberContainer = fiber;
 };
 
 const getFirstTask = () => {
@@ -72,6 +102,8 @@ const getFirstTask = () => {
     tag: FIBER_TAG.ROOT,
     effects: [],
     child: null,
+    // 备份 fiber 对象
+    alternate: task.dom.__rootFiberContainer,
   };
 };
 
@@ -89,23 +121,61 @@ const reconcileChildren = (fiber, children) => {
   // 临时存储，用来记录上一个 fiber
   let preFiber = null;
 
+  /**
+   * 备份 fiber
+   * fiber.alternate.child 是 children 数组中的第一个子节点的备份节点
+   * children 数组中第一个是 child，其余的是 sibling 节点
+   */
+  let alternate = null;
+  if (fiber.alternate && fiber.alternate.child) {
+    alternate = fiber.alternate.child;
+  }
+
   while (index < childrenLength) {
     element = arrifiedChildren[index];
-    newFiber = {
-      type: element.type,
-      props: element.props,
-      tag: getTag(element),
-      effects: [],
-      effectTag: EFFECT_TAG.PLACEMENT,
-      parent: fiber,
-    };
 
-    /**
-     * 为 fiber 对象添加 DOM 对象或组件实例对象
-     * 若是普通节点 stateNode 是 DOM 对象
-     * 若是类组件 stateNode 是组件实例对象
-     */
-    newFiber.stateNode = createStateNode(newFiber);
+    // 区分是新建节点还是备份节点
+    if (element && alternate) {
+      // 更新
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        tag: getTag(element),
+        effects: [],
+        effectTag: EFFECT_TAG.UPDATE,
+        parent: fiber,
+        alternate,
+      };
+      if (element.type === alternate.type) {
+        /**
+         * 类型相同
+         * 旧的 stateNode 直接赋值给新的 stateNode
+         */
+        newFiber.stateNode = alternate.stateNode;
+      } else {
+        /**
+         * 类型不同
+         * 直接创建节点
+         */
+        newFiber.stateNode = createStateNode(newFiber);
+      }
+    } else if (element && !alternate) {
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        tag: getTag(element),
+        effects: [],
+        effectTag: EFFECT_TAG.PLACEMENT,
+        parent: fiber,
+      };
+
+      /**
+       * 为 fiber 对象添加 DOM 对象或组件实例对象
+       * 若是普通节点 stateNode 是 DOM 对象
+       * 若是类组件 stateNode 是组件实例对象
+       */
+      newFiber.stateNode = createStateNode(newFiber);
+    }
 
     // 判断当前 fiber 是上一个 fiber 的 parent 还是 sibling
     if (index === 0) {
@@ -113,6 +183,13 @@ const reconcileChildren = (fiber, children) => {
     } else {
       // 如果不是第一个 child，说明其他的 child 是上一个 child 的 sibling
       preFiber.sibling = newFiber;
+    }
+
+    // 更新备份节点，兄弟节点备份
+    if (alternate && alternate.sibling) {
+      alternate = alternate.sibling;
+    } else {
+      alternate = null;
     }
 
     preFiber = newFiber;

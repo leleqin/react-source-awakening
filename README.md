@@ -47,7 +47,7 @@ Fiber --> 纤维
   parent         当前Fiber的父级 Fiber
   child          当亲 Fiber 的子级 Fiber
   sibling        当前 Fiber 的下一个兄弟 Fiber
-  alternate      Fiber 备份 fiber 比对是使用
+  alternate      Fiber 备份 fiber 比对时使用
 }
 ```
 
@@ -69,3 +69,7 @@ Fiber --> 纤维
 <!-- #endregion -->
 
 ### 1.
+
+## 更新节点
+
+1. 备份旧的 fiber 对象，即 alternate 属性

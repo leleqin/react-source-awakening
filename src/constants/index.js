@@ -7,6 +7,7 @@ export const FIBER_TAG = {
 
 export const EFFECT_TAG = {
   PLACEMENT: "placement",
+  UPDATE: "update",
 };
 
 export const VIRTUAL_DOM_TYPE = {
