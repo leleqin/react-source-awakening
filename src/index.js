@@ -15,7 +15,7 @@ render(jsx, root);
 setTimeout(() => {
   const jsxUpdate = (
     <div>
-      <div>更新</div>
+      {/* <div>更新</div> */}
       <p>Hi fiber</p>
     </div>
   );

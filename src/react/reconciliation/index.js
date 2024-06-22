@@ -41,7 +41,9 @@ const commitAllWork = (fiber) => {
    * 同类组件，找到函数组件的普通父级
    */
   fiber.effects.forEach((f) => {
-    if (f.effectTag === EFFECT_TAG.UPDATE) {
+    if (f.effectTag === EFFECT_TAG.DELETE) {
+      f.parent.stateNode.removeChild(f.stateNode);
+    } else if (f.effectTag === EFFECT_TAG.UPDATE) {
       /**
        * 判断是不是同一种类型节点
        */
@@ -131,12 +133,16 @@ const reconcileChildren = (fiber, children) => {
     alternate = fiber.alternate.child;
   }
 
-  while (index < childrenLength) {
+  while (index < childrenLength || alternate) {
     element = arrifiedChildren[index];
 
-    // 区分是新建节点还是备份节点
-    if (element && alternate) {
-      // 更新
+    if (!element && alternate) {
+      // 删除节点
+      // 备份属性的 effectTag 设置为 delete
+      alternate.effectTag = EFFECT_TAG.DELETE;
+      fiber.effects.push(alternate);
+    } else if (element && alternate) {
+      // 更新节点
       newFiber = {
         type: element.type,
         props: element.props,
@@ -160,6 +166,7 @@ const reconcileChildren = (fiber, children) => {
         newFiber.stateNode = createStateNode(newFiber);
       }
     } else if (element && !alternate) {
+      // 新建节点
       newFiber = {
         type: element.type,
         props: element.props,
@@ -180,7 +187,7 @@ const reconcileChildren = (fiber, children) => {
     // 判断当前 fiber 是上一个 fiber 的 parent 还是 sibling
     if (index === 0) {
       fiber.child = newFiber;
-    } else {
+    } else if (element) {
       // 如果不是第一个 child，说明其他的 child 是上一个 child 的 sibling
       preFiber.sibling = newFiber;
     }
@@ -243,7 +250,6 @@ const executeTask = (fiber) => {
 
   // 最外层 fiber 对象
   pendingCommit = currentExecuterFiber;
-  // console.log(currentExecuterFiber);
 };
 
 const workLoop = (deadline) => {
