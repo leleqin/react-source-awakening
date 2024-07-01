@@ -100,10 +100,13 @@ https://7km.top/main/macro-structure/
 
 有两大 workLoop
 
-1. 任务调度循环 (scheduler)
-   是 React 得以运行的保证，它需要循环调用，控制所有 task 的调度
-2. fiber 构造循环
-   控制 fiber 树的构造；从上至下，使用树的深度优先(DFS)遍历
+1. 任务调度循环 (Scheduler 调度层) -> `packages/scheduler`
+   是 React 得以运行的保证，它需要循环调用，控制所有 task 的调度。保证在**浏览器的空闲时间**执行
+2. fiber 构造循环 (Reconciler 协调层)
+   控制 fiber 树的构造；找出节点差异，并标记差异。从上至下，使用树的深度优先(DFS)遍历
+
+- 渲染层（Renderer）
+  根据 fiber 节点执行操作。渲染工作不可被打断。
 
 fiber 树构造循环属于任务调度循环里的一个 task。每个任务都会重新构造一个 fiber 树。
 
