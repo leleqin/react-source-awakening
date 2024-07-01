@@ -93,3 +93,72 @@ Fiber --> 纤维
   4. 获取最外层的 fiber 对象
 
 4. 进行到 fiber 的第二个阶段时，将更新应用到真实的 DOM 中
+
+https://7km.top/main/macro-structure/
+
+## React 架构
+
+有两大 workLoop
+
+1. 任务调度循环 (scheduler)
+   是 React 得以运行的保证，它需要循环调用，控制所有 task 的调度
+2. fiber 构造循环
+   控制 fiber 树的构造；从上至下，使用树的深度优先(DFS)遍历
+
+fiber 树构造循环属于任务调度循环里的一个 task。每个任务都会重新构造一个 fiber 树。
+
+React 在输入到输出的链路上做了很多优化策略，使**任务循环调度**和**fiber 构造循环**相互配合，就可以实现可中断渲染
+
+### fiber 构造循环
+
+分为两步
+
+1. 构造 fiber 树。
+
+内存里会同时存在两棵 fiber 树
+a. 当前界面的 fiber 树。(挂载到 fiberRoot.current)。初次构造，页面还没有渲染，这个树为 null，`fiberRoot.current = null`。
+b. 正在构造的 fiber 树。(挂载到 HostRootFiber.alternate)。当构造完成，重新渲染页面，使 `fiberRoot.current` 重新指向代表当前页面的 fiber 树。
+
+fiberRoot: 保存 fiber 构建过程中所依赖的全局状态, 根据这些实例变量的值, 控制执行逻辑。
+HostRootFiber: react 应用的首个 fiber 对象。
+
+- 初次创建：在 React 应用首次启动时，页面还没有渲染，此时不会比对，直接构造一颗全新的树。
+- 对比更新：已经渲染，发生更新。用旧的 fiber 和新的 ReactElement 比较，生成新的 fiber；最后的树，可能是全新的，也可能是部分更新的
+  - 不是两颗 fiber 树比较，而是旧的 fiber 和新的 ReactElement 比较。结果生成新的 fiber 子节点。
+  - 对比中，有一些闭包中的全局变量，会随着 fiber 树构造循环的进行而变化
+  - diff 算法（调和算法）。为了复用节点。类型一致的节点才有继续 diff 的必要性。作用：给新增,移动,和删除节点设置 `fiber.flags`, 给要删除的 fiber，将其添加到父节点的 effects 中。
+    - 单节点：如果 key 和 type 都相同，则复用；否则新建
+    - 多节点：多节点一般会存在两轮遍历，第一轮寻找公共序列，第二轮遍历剩余非公共序列
+
+#### 构建过程
+
+使用深度优先遍历，每个 fiber 都会经历两个阶段
+
+- 探寻阶段 beginWork
+  - 根据 ReactElement 对象创建所有的 fiber 节点
+  - 最终构造出 fiber 树形结构，设置 parent，sibling
+  - 设置 `fiber.flags`，标记节点更新状态，等待 completeWork 阶段处理
+  - 设置 `fiber.stateNode`
+    - `ClassComponent`
+    - `function`
+    - `HostComponent` 如 div，span，button 等
+- 回溯阶段 completeWork
+  - 给 fiber 节点创建 DOM 实例
+  - 把当前 fiber 的 effects 添加到父节点的 effects 中
+  - 根据 `fiber.flags` 识别，将当前 fiber 加入到父节点的 effects 队列，等待 commit 阶段处理
+
+2. commitRoot。把最终的 fiber 树，渲染到页面上。
+
+### ReactElement, Fiber, DOM 三者的关系
+
+- ReactElement 是将 jsx 代码通过 Babel 之类的工具编译转换生成的一个虚拟对象。底层是 React.createElement(...)
+- Fiber 是根据 ReactElement 对象进行创建的，多个 fiber 对象构成了一颗 fiber 树；fiber 树是构造 DOM 树的数据模型。fiber 树的改动都会体现到 DOM 树。
+- DOM 文档对象模型。JavaScript 可以访问和操作的对象，进而触发 UI 渲染。
+
+### 优先级
+
+#### 渲染优先级
+
+#### 调度优先级
+
+### 双缓冲技术
