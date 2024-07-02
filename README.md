@@ -118,8 +118,10 @@ React 在输入到输出的链路上做了很多优化策略，使**任务循环
 
 1. 构造 fiber 树。
 
-内存里会同时存在两棵 fiber 树
+内存里会同时存在两棵 fiber 树 （参照下面的 **双缓存技术**）
+
 a. 当前界面的 fiber 树。(挂载到 fiberRoot.current)。初次构造，页面还没有渲染，这个树为 null，`fiberRoot.current = null`。
+
 b. 正在构造的 fiber 树。(挂载到 HostRootFiber.alternate)。当构造完成，重新渲染页面，使 `fiberRoot.current` 重新指向代表当前页面的 fiber 树。
 
 fiberRoot: 保存 fiber 构建过程中所依赖的全局状态, 根据这些实例变量的值, 控制执行逻辑。
@@ -164,4 +166,22 @@ HostRootFiber: react 应用的首个 fiber 对象。
 
 #### 调度优先级
 
-### 双缓冲技术
+### 双缓存技术
+
+为了更快速的 DOM 更新。
+
+在 React 中，使用双缓存技术完成 Fiber 树的构建与替换，实现 DOM 对象的快速更新。
+
+#### 实现思路
+
+1. React 中最多会同时存在两棵 Fiber 树。
+
+- 当前屏幕中的树 ---> `current Fiber` 树
+- 当发生更新时，React 重新构建新的 Fiber 树 ---> `workInProgress Fiber` 树
+
+2. `workInProgress Fiber` 树是即将要显示的树，构建完成后，直接替换 `current Fiber` 树
+
+- `workInProgress Fiber` 树中有些没有改变的内容是可以使用 `current Fiber` 树的。所以需要给两者之间建立关联关系
+- `current Fiber` 对象的 `alternate` 属性；指向对应的 `workInProgress Fiber` 节点对象。相应的，`workInProgress Fiber` 节点的 `alternate` 属性也指向对应的 `current Fiber` 节点对象。
+
+3. 直接替换能够达到快速更新 DOM 的目的。因为 `workInProgress Fiber` 树是在内存中构建的，Fiber 树中存储了对应 DOM 元素，直接能够替换，所以速度很快。
