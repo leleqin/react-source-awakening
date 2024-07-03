@@ -124,9 +124,6 @@ a. 当前界面的 fiber 树。(挂载到 fiberRoot.current)。初次构造，�
 
 b. 正在构造的 fiber 树。(挂载到 HostRootFiber.alternate)。当构造完成，重新渲染页面，使 `fiberRoot.current` 重新指向代表当前页面的 fiber 树。
 
-fiberRoot: 保存 fiber 构建过程中所依赖的全局状态, 根据这些实例变量的值, 控制执行逻辑。
-HostRootFiber: react 应用的首个 fiber 对象。
-
 - 初次创建：在 React 应用首次启动时，页面还没有渲染，此时不会比对，直接构造一颗全新的树。
 - 对比更新：已经渲染，发生更新。用旧的 fiber 和新的 ReactElement 比较，生成新的 fiber；最后的树，可能是全新的，也可能是部分更新的
   - 不是两颗 fiber 树比较，而是旧的 fiber 和新的 ReactElement 比较。结果生成新的 fiber 子节点。
@@ -134,6 +131,17 @@ HostRootFiber: react 应用的首个 fiber 对象。
   - diff 算法（调和算法）。为了复用节点。类型一致的节点才有继续 diff 的必要性。作用：给新增,移动,和删除节点设置 `fiber.flags`, 给要删除的 fiber，将其添加到父节点的 effects 中。
     - 单节点：如果 key 和 type 都相同，则复用；否则新建
     - 多节点：多节点一般会存在两轮遍历，第一轮寻找公共序列，第二轮遍历剩余非公共序列
+
+#### `fiberRoot` 和 `HostRootFiber` 的关系
+
+`fiberRoot`: 表示 Fiber 数据结构对象，是 Fiber 数据结构中最外层对象。
+`HostRootFiber`: 表示组件挂载点对应的 Fiber 对象。比如 React 应用中默认的组件挂载点就是 id 为 root 的 div。react 应用的首个 fiber 对象。
+
+- fiberRoot 包含 rootFiber；在 fiberRoot 的 current 属性中存储 rootFiber。
+- rootFiber 指向 fiberRoot；在 rootFiber 的 stateNode 属性。指向 fiberRoot。
+- 在 React 中 fiberRoot 只有一个，rootFiber 可以有多个；因为 render 的方法可以调用多次。
+
+![`fiberRoot` 和 `HostRootFiber` 的关系](./images/fiberRoot.png)
 
 #### 构建过程
 
